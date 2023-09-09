@@ -6,6 +6,7 @@ import 'package:new_reddit_clone/core/constants/constants.dart';
 
 import 'package:new_reddit_clone/core/modules/postModels.dart';
 import 'package:new_reddit_clone/features/auth/controller/AuthController.dart';
+import 'package:new_reddit_clone/features/post/controller/addpostController.dart';
 import 'package:new_reddit_clone/theme/pallete.dart';
 
 class PostCard extends ConsumerWidget {
@@ -14,6 +15,10 @@ class PostCard extends ConsumerWidget {
     super.key,
     required this.post,
   });
+
+  void deletepost(WidgetRef ref, BuildContext context) {
+    ref.read(PostControllerProvider.notifier).deletePost(post, context);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -71,7 +76,7 @@ class PostCard extends ConsumerWidget {
                             ),
                             if (post.uid == user.uid)
                               IconButton(
-                                onPressed: () {},
+                                onPressed: () => deletepost(ref, context),
                                 icon: Icon(
                                   Icons.delete,
                                   color: Colors.red,
