@@ -1,0 +1,1 @@
+enum ThemMode { light, dark }
