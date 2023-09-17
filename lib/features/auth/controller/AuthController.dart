@@ -7,24 +7,19 @@ import 'package:new_reddit_clone/features/auth/repository/auth_repository.dart';
 
 final userProvider = StateProvider<UserModel?>((ref) => null);
 
-
 final authControllerProvider = StateNotifierProvider<AuthController, bool>(
     (ref) => AuthController(
         authRepository: ref.watch(authRepositoryProvider), ref: ref));
-
 
 final authStateChangeProvider = StreamProvider((ref) {
   final authController = ref.watch(authControllerProvider.notifier);
   return authController.authStateChange;
 });
 
-
 final getUserDataProvider = StreamProvider.family((ref, String uid) {
   final authController = ref.watch(authControllerProvider.notifier);
   return authController.getUserData(uid);
 });
-
-
 
 class AuthController extends StateNotifier<bool> {
   final AuthRepository _authRepository;
