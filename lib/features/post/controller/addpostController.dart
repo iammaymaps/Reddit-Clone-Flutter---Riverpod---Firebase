@@ -2,13 +2,16 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:new_reddit_clone/core/enum/enum.dart';
 import 'package:new_reddit_clone/core/modules/Community_Model.dart';
+import 'package:new_reddit_clone/core/modules/comments.dart';
 import 'package:new_reddit_clone/core/modules/postModels.dart';
 import 'package:new_reddit_clone/core/utils.dart';
 import 'package:new_reddit_clone/features/auth/controller/AuthController.dart';
 
 import 'package:new_reddit_clone/features/auth/providers/storage_repositry_provider.dart';
 import 'package:new_reddit_clone/features/post/repository/addrepository.dart';
+import 'package:new_reddit_clone/user_profile/controller/userProfileController.dart';
 import 'package:routemaster/routemaster.dart';
 import 'package:uuid/uuid.dart';
 
@@ -27,6 +30,16 @@ final userPostsProvider =
     StreamProvider.family((ref, List<Community> communities) {
   final postcontroller = ref.watch(PostControllerProvider.notifier);
   return postcontroller.fetchUserData(communities);
+});
+
+final getPostByIdProvider = StreamProvider.family((ref, String postId) {
+  final postcontroller = ref.watch(PostControllerProvider.notifier);
+  return postcontroller.getPostById(postId);
+});
+
+final getPostByCommentsProvider = StreamProvider.family((ref, String postId) {
+  final postcontroller = ref.watch(PostControllerProvider.notifier);
+  return postcontroller.fetchPostComments(postId);
 });
 
 class PostController extends StateNotifier<bool> {
@@ -66,6 +79,9 @@ class PostController extends StateNotifier<bool> {
         commentCount: 0);
 
     final res = await _postRepository.addPost(post);
+    _ref
+        .read(userProfileControllerProvider.notifier)
+        .updateUserKarma(UserKarma.textpost);
 
     state = false;
 
@@ -99,6 +115,9 @@ class PostController extends StateNotifier<bool> {
         commentCount: 0);
 
     final res = await _postRepository.addPost(post);
+    _ref
+        .read(userProfileControllerProvider.notifier)
+        .updateUserKarma(UserKarma.linkpost);
 
     state = false;
 
@@ -137,6 +156,9 @@ class PostController extends StateNotifier<bool> {
           commentCount: 0);
 
       final res = await _postRepository.addPost(post);
+      _ref
+          .read(userProfileControllerProvider.notifier)
+          .updateUserKarma(UserKarma.imagePost);
 
       state = false;
 
@@ -156,7 +178,49 @@ class PostController extends StateNotifier<bool> {
 
   void deletePost(Post post, BuildContext context) async {
     final res = await _postRepository.deletePost(post);
+    _ref
+        .read(userProfileControllerProvider.notifier)
+        .updateUserKarma(UserKarma.deletePost);
     res.fold(
         (l) => null, (r) => showSnackBar(context, 'Post Deleted successfully'));
+  }
+
+  void upvote(Post post) async {
+    final uid = _ref.read(userProvider)!.uid;
+    _postRepository.upvote(post, uid);
+  }
+
+  void downvote(Post post) async {
+    final uid = _ref.read(userProvider)!.uid;
+    _postRepository.downvote(post, uid);
+  }
+
+  Stream<Post> getPostById(String postId) {
+    return _postRepository.getPostById(postId);
+  }
+
+  void addComment({
+    required BuildContext context,
+    required String text,
+    required Post postId,
+  }) async {
+    final user = _ref.read(userProvider)!;
+    String commentId = const Uuid().v1();
+    Comments comment = Comments(
+        id: commentId,
+        text: text,
+        postId: postId.id,
+        username: user.name,
+        createdAt: DateTime.now(),
+        profilePic: user.profilePic);
+    final res = await _postRepository.addComment(comment);
+    _ref
+        .read(userProfileControllerProvider.notifier)
+        .updateUserKarma(UserKarma.comment);
+    res.fold((l) => showSnackBar(context, l.message), (r) => null);
+  }
+
+  Stream<List<Comments>> fetchPostComments(String postId) {
+    return _postRepository.getCommentsofOst(postId);
   }
 }

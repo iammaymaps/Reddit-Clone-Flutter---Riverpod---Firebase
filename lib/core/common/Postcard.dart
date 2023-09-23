@@ -2,12 +2,16 @@
 import 'package:any_link_preview/any_link_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:new_reddit_clone/core/common/Error_text.dart';
+import 'package:new_reddit_clone/core/common/Loader.dart';
 import 'package:new_reddit_clone/core/constants/constants.dart';
 
 import 'package:new_reddit_clone/core/modules/postModels.dart';
 import 'package:new_reddit_clone/features/auth/controller/AuthController.dart';
+import 'package:new_reddit_clone/features/auth/controller/CommunityController.dart';
 import 'package:new_reddit_clone/features/post/controller/addpostController.dart';
 import 'package:new_reddit_clone/theme/pallete.dart';
+import 'package:routemaster/routemaster.dart';
 
 class PostCard extends ConsumerWidget {
   final Post post;
@@ -18,6 +22,26 @@ class PostCard extends ConsumerWidget {
 
   void deletepost(WidgetRef ref, BuildContext context) {
     ref.read(PostControllerProvider.notifier).deletePost(post, context);
+  }
+
+  void Upvotepost(WidgetRef ref) {
+    ref.read(PostControllerProvider.notifier).upvote(post);
+  }
+
+  void downvotepost(WidgetRef ref) {
+    ref.read(PostControllerProvider.notifier).upvote(post);
+  }
+
+  void navigateToUser(BuildContext context) {
+    Routemaster.of(context).push('/u/${post.uid}');
+  }
+
+  void navigateTocommunity(BuildContext context) {
+    Routemaster.of(context).push('/r/${post.communityName}');
+  }
+
+  void navigateTocomments(BuildContext context) {
+    Routemaster.of(context).push('/post/${post.id}/comments');
   }
 
   @override
@@ -46,10 +70,13 @@ class PostCard extends ConsumerWidget {
                       children: [
                         Row(
                           children: [
-                            CircleAvatar(
-                              backgroundImage:
-                                  NetworkImage(post.communityProfile),
-                              radius: 16,
+                            GestureDetector(
+                              onTap: () => navigateTocommunity(context),
+                              child: CircleAvatar(
+                                backgroundImage:
+                                    NetworkImage(post.communityProfile),
+                                radius: 16,
+                              ),
                             ),
                             Padding(
                               padding: const EdgeInsets.only(left: 8),
@@ -62,10 +89,13 @@ class PostCard extends ConsumerWidget {
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold),
                                   ),
-                                  Text(
-                                    'r/${post.username}',
-                                    style: TextStyle(
-                                      fontSize: 12,
+                                  GestureDetector(
+                                    onTap: () => navigateToUser(context),
+                                    child: Text(
+                                      'u/${post.username}',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -136,11 +166,12 @@ class PostCard extends ConsumerWidget {
                     ),
                   ),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(
                         children: [
                           IconButton(
-                              onPressed: () {},
+                              onPressed: () => Upvotepost(ref),
                               icon: Icon(
                                 Icons.arrow_upward,
                                 size: 30,
@@ -153,7 +184,7 @@ class PostCard extends ConsumerWidget {
                             style: TextStyle(fontSize: 10),
                           ),
                           IconButton(
-                              onPressed: () {},
+                              onPressed: () => downvotepost(ref),
                               icon: Icon(
                                 Icons.arrow_downward,
                                 size: 30,
@@ -169,7 +200,7 @@ class PostCard extends ConsumerWidget {
                       Row(
                         children: [
                           IconButton(
-                              onPressed: () {},
+                              onPressed: () => navigateTocomments(context),
                               icon: Icon(
                                 Icons.comment,
                                 size: 30,
@@ -180,13 +211,40 @@ class PostCard extends ConsumerWidget {
                           ),
                         ],
                       ),
+                      ref
+                          .watch(getCommunityByNameProvider(post.communityName))
+                          .when(
+                              data: (data) {
+                                if (data.mods.contains(user.uid)) {
+                                  return IconButton(
+                                      onPressed: () => deletepost(ref, context),
+                                      icon: Icon(
+                                        Icons.admin_panel_settings,
+                                        size: 30,
+                                      ));
+                                }
+                                return const SizedBox();
+                              },
+                              loading: () => const Loader(),
+                              error: (error, stakeTrace) =>
+                                  ErrorText(error: error.toString())),
+// This code snippet creates an icon button with a comment icon, and sets the size of the icon to 30. The button has an empty onPressed function.
+                      IconButton(
+                          onPressed: () {},
+                          icon: Icon(
+                            Icons.comment,
+                            size: 30,
+                          )),
                     ],
                   ),
                 ],
               ))
             ],
           ),
-        )
+        ),
+        SizedBox(
+          height: 10,
+        ),
       ],
     );
   }

@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:new_reddit_clone/core/common/Error_text.dart';
 import 'package:new_reddit_clone/core/common/Loader.dart';
+import 'package:new_reddit_clone/core/common/Postcard.dart';
 import 'package:new_reddit_clone/features/auth/controller/AuthController.dart';
+import 'package:new_reddit_clone/user_profile/controller/userProfileController.dart';
 import 'package:routemaster/routemaster.dart';
 
 class UserProfileScreen extends ConsumerWidget {
@@ -86,7 +88,21 @@ class UserProfileScreen extends ConsumerWidget {
                       ),
                     ];
                   },
-                  body: const Text('Displaying posts')),
+                  body: ref.watch(getUserPostProvider(uid)).when(
+                        data: (data) {
+                          return ListView.builder(
+                              itemCount: data.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                final post = data[index];
+                                return PostCard(post: post);
+                              });
+                        },
+                        error: (error, StackTrace) {
+                          print(error.toString());
+                          return ErrorText(error: error.toString());
+                        },
+                        loading: (() => const Loader()),
+                      )),
               error: (error, StackTrace) => ErrorText(error: error.toString()),
               loading: (() => const Loader()),
             ));

@@ -7,6 +7,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:new_reddit_clone/core/Failure.dart';
 import 'package:new_reddit_clone/core/constants/constants.dart';
 import 'package:new_reddit_clone/core/modules/Community_Model.dart';
+import 'package:new_reddit_clone/core/modules/postModels.dart';
 import 'package:new_reddit_clone/core/utils.dart';
 
 import 'package:new_reddit_clone/features/Community/Community_Repository.dart';
@@ -40,6 +41,10 @@ final getCommunityByNameProvider = StreamProvider.family((ref, String name) {
 
 final searchCommunityProvider = StreamProvider.family((ref, String query) {
   return ref.watch(CommunityControllerProvider.notifier).searchCommunity(query);
+});
+
+final getCommunityPostProvider = StreamProvider.family((ref, String name) {
+  return ref.read(CommunityControllerProvider.notifier).getCommunityPost(name);
 });
 
 class CommunityController extends StateNotifier<bool> {
@@ -130,5 +135,9 @@ class CommunityController extends StateNotifier<bool> {
     final res = await _communityRepository.addMods(communityname, uids);
     res.fold((l) => showSnackBar(context, l.message),
         (r) => Routemaster.of(context).pop());
+  }
+
+  Stream<List<Post>> getCommunityPost(String name) {
+    return _communityRepository.getCommunityPosts(name);
   }
 }

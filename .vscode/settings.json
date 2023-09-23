@@ -1,3 +1,4 @@
 {
-  "cmake.sourceDirectory": "G:/Flutter/new_reddit_clone/linux"
+  "cmake.sourceDirectory": "G:/Flutter/new_reddit_clone/linux",
+  "editor.acceptSuggestionOnEnter": "on"
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:new_reddit_clone/core/Home/screens/commentScreen.dart';
 import 'package:new_reddit_clone/features/Community_Screens/Create_Community_Screens.dart';
 
 import 'package:new_reddit_clone/features/Home/HomeScreens.dart';
@@ -16,21 +17,15 @@ import 'features/auth/screens/LoginScreen.dart';
 final loggedOutRoute =
     RouteMap(routes: {'/': (_) => const MaterialPage(child: LoginScreen())});
 
-
-
 final loggedInRoute = RouteMap(routes: {
   '/': (_) => const MaterialPage(child: HomeScreens()),
-
   '/create-community': (_) =>
       const MaterialPage(child: CreateCommunityScreen()),
-
-      
   '/r/:name': (route) => MaterialPage(
           child: CommunityScreen(
         name: route.pathParameters['name']!,
       )),
   '/mod-tools/:name': (routeData) =>
-
       MaterialPage(child: ModTool(name: routeData.pathParameters['name']!)),
   '/edit-community/:name': (routeData) => MaterialPage(
       child: EditCommunity(name: routeData.pathParameters['name']!)),
@@ -42,4 +37,6 @@ final loggedInRoute = RouteMap(routes: {
       child: EditProfileScreen(uid: routeData.pathParameters['uid']!)),
   '/add-post/:type': (routeData) => MaterialPage(
       child: AddPostypeScreen(type: routeData.pathParameters['type']!)),
+  '/post/:postId/comments': (route) => MaterialPage(
+      child: CommentsScreen(postId: route.pathParameters['postId']!)),
 });

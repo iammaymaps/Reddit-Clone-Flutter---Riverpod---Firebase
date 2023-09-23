@@ -5,6 +5,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:new_reddit_clone/core/Failure.dart';
 import 'package:new_reddit_clone/core/constants/firebase_constants.dart';
 import 'package:new_reddit_clone/core/modules/Community_Model.dart';
+import 'package:new_reddit_clone/core/modules/postModels.dart';
 import 'package:new_reddit_clone/core/type_def.dart';
 import 'package:new_reddit_clone/features/auth/providers/firebase_Provider.dart';
 
@@ -17,6 +18,8 @@ class CommunityRepository {
   CommunityRepository({
     required FirebaseFirestore firestore,
   }) : _firestore = firestore;
+  CollectionReference get _posts =>
+      _firestore.collection(FirebaseConstants.postsCollection);
 
   FutureVoid createCommunity(Community community) async {
     try {
@@ -114,5 +117,15 @@ class CommunityRepository {
   Stream<Community> getCommunityByName(String name) {
     return _communities.doc(name).snapshots().map(
         (event) => Community.fromMap(event.data() as Map<String, dynamic>));
+  }
+
+  Stream<List<Post>> getCommunityPosts(String uid) {
+    return _posts
+        .where('communityName', isEqualTo: uid)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((event) => event.docs
+            .map((e) => Post.fromMap(e.data() as Map<String, dynamic>))
+            .toList());
   }
 }
