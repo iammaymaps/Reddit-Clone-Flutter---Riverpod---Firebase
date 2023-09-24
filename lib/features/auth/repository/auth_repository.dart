@@ -66,11 +66,46 @@ class AuthRepository {
             uid: userCredential.user!.uid,
             isAuthenticated: true,
             karma: 0,
-            awards: []);
+            awards: [
+              'awesomeAns',
+              'gold',
+              'platinum',
+              'helpful',
+              'plusone',
+              'rocket',
+              'thankyou',
+              'til',
+            ]);
         await _users.doc(userCredential.user!.uid).set(userModel.toMap());
       } else {
         userModel = await getUserData(userCredential.user!.uid).first;
       }
+      return right(userModel);
+
+      // Print the signed-in user's email
+    } on FirebaseAuthException catch (e) {
+      throw e.message!;
+    } catch (e) {
+      return left(Failure(e.toString()));
+
+      // Re-throw the error to handle it elsewhere if needed// Print any error that occurred during sign-in
+    }
+  }
+
+  FutureEither<UserModel> signInAsGuest() async {
+    try {
+      var userCredential = await _auth.signInAnonymously();
+
+      UserModel userModel = UserModel(
+          name: "Guest",
+          profilePic: Constants.avatarDefault,
+          banner: Constants.bannerDefault,
+          uid: userCredential.user!.uid,
+          isAuthenticated: false,
+          karma: 0,
+          awards: []);
+      await _users.doc(userCredential.user!.uid).set(userModel.toMap());
+
       return right(userModel);
 
       // Print the signed-in user's email

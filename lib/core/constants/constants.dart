@@ -25,13 +25,13 @@ class Constants {
   static const awardsPath = 'assets/images/awards';
 
   static const awards = {
-    'awesomeAns': '${Constants.awardsPath}/awesomeanswer.png',
-    'gold': '${Constants.awardsPath}/gold.png',
-    'platinum': '${Constants.awardsPath}/platinum.png',
-    'helpful': '${Constants.awardsPath}/helpful.png',
-    'plusone': '${Constants.awardsPath}/plusone.png',
-    'rocket': '${Constants.awardsPath}/rocket.png',
-    'thankyou': '${Constants.awardsPath}/thankyou.png',
-    'til': '${Constants.awardsPath}/til.png',
+    'awesomeAns': 'assets/awards/awesomeanswer.png',
+    'gold': 'assets/awards/gold.png',
+    'platinum': 'assets/awards/platinum.png',
+    'helpful': 'assets/awards/helpful.png',
+    'plusone': 'assets/awards/plusone.png',
+    'rocket': 'assets/awards/rocket.png',
+    'thankyou': 'assets/awards/thankyou.png',
+    'til': 'assets/awards/til.png',
   };
 }

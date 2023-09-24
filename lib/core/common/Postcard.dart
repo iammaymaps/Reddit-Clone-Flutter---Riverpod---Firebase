@@ -44,6 +44,12 @@ class PostCard extends ConsumerWidget {
     Routemaster.of(context).push('/post/${post.id}/comments');
   }
 
+  void awardsPost(WidgetRef ref, String award, BuildContext context) async {
+    ref
+        .read(PostControllerProvider.notifier)
+        .awardPost(post: post, award: award, context: context);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isTypeimage = post.type == 'image';
@@ -114,19 +120,35 @@ class PostCard extends ConsumerWidget {
                               )
                           ],
                         ),
-                        SizedBox(
-                          height: 15,
-                        ),
+                        if (post.awards.isNotEmpty) ...[
+                          SizedBox(
+                            height: 5,
+                            child: SizedBox(
+                              height: 25,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: post.awards.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  final award = post.awards[index];
+                                  return Image.asset(
+                                    Constants.awards[award]!,
+                                    height: 23,
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
                         Row(
                           children: [
-                            // Padding(
-                            //   padding: EdgeInsets.only(top: 10),
-                            //   child: Text(
-                            //     post.title,
-                            //     style: TextStyle(
-                            //         fontSize: 19, fontWeight: FontWeight.bold),
-                            //   ),
-                            // ),
+                            Padding(
+                              padding: EdgeInsets.only(top: 10),
+                              child: Text(
+                                post.title,
+                                style: TextStyle(
+                                    fontSize: 19, fontWeight: FontWeight.bold),
+                              ),
+                            ),
                           ],
                         ),
                         if (isTypeimage)
@@ -228,11 +250,42 @@ class PostCard extends ConsumerWidget {
                               loading: () => const Loader(),
                               error: (error, stakeTrace) =>
                                   ErrorText(error: error.toString())),
+
 // This code snippet creates an icon button with a comment icon, and sets the size of the icon to 30. The button has an empty onPressed function.
                       IconButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            showDialog(
+                                context: context,
+                                builder: (context) => Dialog(
+                                      child: Padding(
+                                          padding: const EdgeInsets.all(20),
+                                          child: GridView.builder(
+                                              shrinkWrap: true,
+                                              gridDelegate:
+                                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                                      crossAxisCount: 4),
+                                              itemCount: user.awards.length,
+                                              itemBuilder:
+                                                  (BuildContext context,
+                                                      int index) {
+                                                final award =
+                                                    user.awards[index];
+                                                return GestureDetector(
+                                                  onTap: () => awardsPost(
+                                                      ref, award, context),
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    child: Image.asset(Constants
+                                                        .awards[award]!),
+                                                  ),
+                                                );
+                                              })),
+                                    ));
+                          },
                           icon: Icon(
-                            Icons.comment,
+                            Icons.card_giftcard_outlined,
                             size: 30,
                           )),
                     ],
